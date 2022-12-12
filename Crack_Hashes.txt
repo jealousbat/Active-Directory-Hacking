@@ -1,0 +1,28 @@
+### Crack Hash
+
+
+LM
+	john --format=lm hash.txt
+	hashcat -m 3000 -a 3 hash.txt
+NTLM
+	john --format=nt hash.txt
+	hashcat -m 1000 -a 3 hash.txt
+NetNTLMv1
+	john --format=netntlm hash.txt
+	hashcat -m 5500 -a 3 hash.txt
+	https://crack.sh/
+NetNTLMv2
+	john --format=netntlmv2 hash.txt
+	hashcat -m 5600 -a 0 hash.txt rockyou.txt
+Kerberos 5 TGS
+	hashcat -m 13100 -a 0 spn.txt rockyou.txt
+	john spn.txt --format=krb5tgs --wordlist=rockyou.txt
+Kerberos 5 TGS AES128
+	hashcat -m 19600 -a 0 spn.txt rockyou.txt
+Kerberos 5 TGS AES256
+	hashcat -m 19700 -a 0 spn.txt rockyou.txt
+Kerberos ASREP
+	hashcat -m 18200 -a 0 AS-REP_roast-hashes rockyou.txt
+MsCache 2 (slow)
+	hashcat -m 2100 -a 0 mscache-hash rockyou.txt
+

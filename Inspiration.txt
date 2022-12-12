@@ -1,0 +1,20 @@
+### Inspiration
+
+GREAT STUFF
+
+https://mayfly277.github.io/posts/GOADv2-pwning_part1/
+
+
+
+	https://www.thehacker.recipes/  (@_nwodtuhs)
+	https://www.ired.team/ (@spotheplanet)
+	https://ppn.snovvcrash.rocks/ (@snovvcrash)
+	https://book.hacktricks.xyz/ (@carlospolopm)
+	https://github.com/swisskyrepo/PayloadsAllTheThings/ (@pentest_swissky)
+	https://blog.harmj0y.net/ (@harmj0y)
+	https://hausec.com/domain-penetration-testing/ (@haus3c)
+	https://dirkjanm.io/ (@_dirkjan)
+	https://casvancooten.com/ (@chvancooten)
+	https://zer1t0.gitlab.io/posts/attacking_ad/
+	https://beta.hackndo.com (@HackAndDo)
+

